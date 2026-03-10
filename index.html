@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Campus Events India</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+text-align:center;
+color:white;
+overflow:hidden;
+background:linear-gradient(#0a2a43,#0f4c75,#3282b8);
+height:100vh;
+}
+
+header{
+padding:12px;
+background:rgba(0,0,0,0.4);
+}
+
+button{
+padding:10px 18px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+margin:6px;
+}
+
+input,select{
+padding:10px;
+border-radius:8px;
+border:none;
+margin:6px;
+}
+
+.screen{
+margin-top:60px;
+}
+
+.event{
+background:rgba(255,255,255,0.2);
+width:60%;
+margin:20px auto;
+padding:20px;
+border-radius:12px;
+backdrop-filter:blur(6px);
+}
+
+.bubble{
+position:fixed;
+bottom:-20px;
+border-radius:50%;
+background:rgba(255,255,255,0.6);
+animation:rise linear forwards;
+}
+
+@keyframes rise{
+0%{transform:translateY(0);opacity:0.9;}
+100%{transform:translateY(-110vh);opacity:0;}
+}
+
+#danger{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#8b0000;
+color:white;
+font-size:26px;
+padding-top:20%;
+z-index:10;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>Campus Events India</h2>
+</header>
+
+<div id="danger">
+⚠ ACCESS DENIED ⚠
+<br><br>
+You are not the operator
+<br><br>
+<button onclick="enterUser()">Continue as User</button>
+<button onclick="goBack()">Back</button>
+</div>
+
+<div id="roleScreen" class="screen">
+<h2>Select Mode</h2>
+<button onclick="operatorMode()">Operator</button>
+<button onclick="enterUser()">User</button>
+</div>
+
+<div id="loginScreen" class="screen" style="display:none">
+<h2>Operator Login</h2>
+<input id="username" placeholder="Username"><br>
+<input id="password" type="password" placeholder="Password"><br>
+<button onclick="login()">Login</button>
+<br><br>
+<button onclick="goBack()">⬅ Back</button>
+</div>
+
+<div id="site" style="display:none">
+
+<button onclick="goBack()">⬅ Back to Menu</button>
+
+<h3>Select Location</h3>
+
+<select id="state">
+<option value="">Select State</option>
+<option>Bihar</option>
+<option>Maharashtra</option>
+<option>Karnataka</option>
+<option>Tamil Nadu</option>
+<option>Delhi</option>
+</select>
+
+<select id="city">
+<option>Select City</option>
+</select>
+
+<button onclick="showEvents()">Check Events</button>
+
+<div id="events"></div>
+
+<div id="adminPanel" style="display:none">
+
+<h3>Operator Panel</h3>
+
+<input id="eventName" placeholder="Event Name"><br>
+<input id="eventState" placeholder="State"><br>
+<input id="eventCity" placeholder="City"><br>
+<input id="eventLocation" placeholder="Location"><br>
+<input id="eventDate" placeholder="Date"><br>
+<input id="eventLink" placeholder="Registration Link"><br>
+
+<button onclick="addEvent()">Add Event</button>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+
+apiKey: "YOUR_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT",
+
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const eventsRef = collection(db,"events");
+
+let isAdmin=false;
+let attempts=0;
+
+const adminUser="Tejas0118";
+const adminPass="6272";
+
+window.operatorMode=function(){
+document.getElementById("roleScreen").style.display="none";
+document.getElementById("loginScreen").style.display="block";
+}
+
+window.enterUser=function(){
+document.getElementById("danger").style.display="none";
+document.getElementById("roleScreen").style.display="none";
+document.getElementById("loginScreen").style.display="none";
+document.getElementById("site").style.display="block";
+}
+
+window.goBack=function(){
+document.getElementById("site").style.display="none";
+document.getElementById("loginScreen").style.display="none";
+document.getElementById("danger").style.display="none";
+document.getElementById("roleScreen").style.display="block";
+}
+
+window.login=function(){
+
+let u=document.getElementById("username").value;
+let p=document.getElementById("password").value;
+
+if(u===adminUser && p===adminPass){
+
+isAdmin=true;
+
+alert("Welcome Operator");
+
+document.getElementById("loginScreen").style.display="none";
+document.getElementById("site").style.display="block";
+document.getElementById("adminPanel").style.display="block";
+
+}else{
+
+attempts++;
+
+if(attempts>=3){
+document.getElementById("danger").style.display="block";
+}else{
+alert("Wrong password");
+}
+
+}
+
+}
+
+window.addEvent=async function(){
+
+await addDoc(eventsRef,{
+name:eventName.value,
+state:eventState.value,
+city:eventCity.value,
+location:eventLocation.value,
+date:eventDate.value,
+link:eventLink.value
+});
+
+alert("Event added");
+
+}
+
+window.deleteEvent=async function(id){
+await deleteDoc(doc(db,"events",id));
+}
+
+window.showEvents=function(){
+
+let state=document.getElementById("state").value;
+let city=document.getElementById("city").value;
+
+let found=false;
+
+onSnapshot(eventsRef,(snapshot)=>{
+
+let div=document.getElementById("events");
+div.innerHTML="";
+
+snapshot.forEach((docSnap)=>{
+
+let e=docSnap.data();
+
+if(e.state===state && e.city===city){
+
+found=true;
+
+div.innerHTML+=`
+<div class="event">
+<h3>${e.name}</h3>
+<p>${e.location}</p>
+<p>${e.date}</p>
+<a href="${e.link}" target="_blank">
+<button>Register</button>
+</a>
+${isAdmin ? `<button onclick="deleteEvent('${docSnap.id}')">Delete</button>`:""}
+</div>
+`;
+
+}
+
+});
+
+if(found){
+alert("Events found");
+}else{
+alert("No updates");
+}
+
+});
+
+}
+
+function createBubble(){
+
+let bubble=document.createElement("div");
+
+bubble.className="bubble";
+
+let size=Math.random()*15+8;
+
+bubble.style.width=size+"px";
+bubble.style.height=size+"px";
+
+bubble.style.left=Math.random()*window.innerWidth+"px";
+
+bubble.style.animationDuration=(Math.random()*6+6)+"s";
+
+document.body.appendChild(bubble);
+
+setTimeout(()=>bubble.remove(),12000);
+
+}
+
+setInterval(createBubble,600);
+
+</script>
+
+</body>
+</html>
