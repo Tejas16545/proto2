@@ -311,6 +311,77 @@ setTimeout(()=>bubble.remove(),12000);
 setInterval(createBubble,600);
 
 </script>
+  <script type="module">
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCkQ59xCvi4MyMdDeZZKz-1C2i8QHej4Uk",
+  authDomain: "proto2-e6b66.firebaseapp.com",
+  projectId: "proto2-e6b66",
+  storageBucket: "proto2-e6b66.firebasestorage.app",
+  messagingSenderId: "342576277397",
+  appId: "1:342576277397:web:4507b74093e139d9b6b89c",
+  measurementId: "G-8HG0ZB9Q8V"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const eventsRef = collection(db,"events");
+
+/* real-time updates */
+
+onSnapshot(eventsRef,(snapshot)=>{
+
+let div=document.getElementById("events");
+if(!div) return;
+
+div.innerHTML="";
+
+snapshot.forEach((docSnap)=>{
+
+let e=docSnap.data();
+
+div.innerHTML+=`
+<div class="event">
+<h3>${e.name}</h3>
+<p>${e.location}</p>
+<p>${e.date}</p>
+<a href="${e.link}" target="_blank">
+<button>Register</button>
+</a>
+</div>
+`;
+
+});
+
+});
+
+/* add event */
+
+window.addEvent=async function(){
+
+await addDoc(eventsRef,{
+name:document.getElementById("eventName").value,
+state:document.getElementById("eventState").value,
+city:document.getElementById("eventCity").value,
+location:document.getElementById("eventLocation").value,
+date:document.getElementById("eventDate").value,
+link:document.getElementById("eventLink").value
+});
+
+alert("Event added");
+
+};
+
+/* delete event */
+
+window.deleteEvent=async function(id){
+await deleteDoc(doc(db,"events",id));
+};
+
+</script>
 </body>
 </html>
