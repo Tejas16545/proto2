@@ -47,7 +47,6 @@ width:60%;
 margin:20px auto;
 padding:20px;
 border-radius:12px;
-backdrop-filter:blur(6px);
 }
 
 .bubble{
@@ -127,6 +126,11 @@ You are not the operator
 
 <select id="city">
 <option>Select City</option>
+<option>Patna</option>
+<option>Pune</option>
+<option>Bangalore</option>
+<option>Chennai</option>
+<option>Delhi</option>
 </select>
 
 <button onclick="showEvents()">Check Events</button>
@@ -152,15 +156,16 @@ You are not the operator
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
-
-apiKey: "YOUR_KEY",
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-projectId: "YOUR_PROJECT",
-
+apiKey: "AIzaSyCkQ59xCvi4MyMdDeZZKz-1C2i8QHej4Uk",
+authDomain: "proto2-e6b66.firebaseapp.com",
+projectId: "proto2-e6b66",
+storageBucket: "proto2-e6b66.firebasestorage.app",
+messagingSenderId: "342576277397",
+appId: "1:342576277397:web:4507b74093e139d9b6b89c"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -175,28 +180,28 @@ const adminUser="Tejas0118";
 const adminPass="6272";
 
 window.operatorMode=function(){
-document.getElementById("roleScreen").style.display="none";
-document.getElementById("loginScreen").style.display="block";
+roleScreen.style.display="none";
+loginScreen.style.display="block";
 }
 
 window.enterUser=function(){
-document.getElementById("danger").style.display="none";
-document.getElementById("roleScreen").style.display="none";
-document.getElementById("loginScreen").style.display="none";
-document.getElementById("site").style.display="block";
+danger.style.display="none";
+roleScreen.style.display="none";
+loginScreen.style.display="none";
+site.style.display="block";
 }
 
 window.goBack=function(){
-document.getElementById("site").style.display="none";
-document.getElementById("loginScreen").style.display="none";
-document.getElementById("danger").style.display="none";
-document.getElementById("roleScreen").style.display="block";
+site.style.display="none";
+loginScreen.style.display="none";
+danger.style.display="none";
+roleScreen.style.display="block";
 }
 
 window.login=function(){
 
-let u=document.getElementById("username").value;
-let p=document.getElementById("password").value;
+let u=username.value;
+let p=password.value;
 
 if(u===adminUser && p===adminPass){
 
@@ -204,16 +209,16 @@ isAdmin=true;
 
 alert("Welcome Operator");
 
-document.getElementById("loginScreen").style.display="none";
-document.getElementById("site").style.display="block";
-document.getElementById("adminPanel").style.display="block";
+loginScreen.style.display="none";
+site.style.display="block";
+adminPanel.style.display="block";
 
 }else{
 
 attempts++;
 
 if(attempts>=3){
-document.getElementById("danger").style.display="block";
+danger.style.display="block";
 }else{
 alert("Wrong password");
 }
@@ -243,15 +248,14 @@ await deleteDoc(doc(db,"events",id));
 
 window.showEvents=function(){
 
-let state=document.getElementById("state").value;
-let city=document.getElementById("city").value;
+let state=state.value;
+let city=city.value;
 
 let found=false;
 
 onSnapshot(eventsRef,(snapshot)=>{
 
-let div=document.getElementById("events");
-div.innerHTML="";
+events.innerHTML="";
 
 snapshot.forEach((docSnap)=>{
 
@@ -261,7 +265,7 @@ if(e.state===state && e.city===city){
 
 found=true;
 
-div.innerHTML+=`
+events.innerHTML+=`
 <div class="event">
 <h3>${e.name}</h3>
 <p>${e.location}</p>
@@ -311,77 +315,6 @@ setTimeout(()=>bubble.remove(),12000);
 setInterval(createBubble,600);
 
 </script>
-  <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCkQ59xCvi4MyMdDeZZKz-1C2i8QHej4Uk",
-  authDomain: "proto2-e6b66.firebaseapp.com",
-  projectId: "proto2-e6b66",
-  storageBucket: "proto2-e6b66.firebasestorage.app",
-  messagingSenderId: "342576277397",
-  appId: "1:342576277397:web:4507b74093e139d9b6b89c",
-  measurementId: "G-8HG0ZB9Q8V"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const eventsRef = collection(db,"events");
-
-/* real-time updates */
-
-onSnapshot(eventsRef,(snapshot)=>{
-
-let div=document.getElementById("events");
-if(!div) return;
-
-div.innerHTML="";
-
-snapshot.forEach((docSnap)=>{
-
-let e=docSnap.data();
-
-div.innerHTML+=`
-<div class="event">
-<h3>${e.name}</h3>
-<p>${e.location}</p>
-<p>${e.date}</p>
-<a href="${e.link}" target="_blank">
-<button>Register</button>
-</a>
-</div>
-`;
-
-});
-
-});
-
-/* add event */
-
-window.addEvent=async function(){
-
-await addDoc(eventsRef,{
-name:document.getElementById("eventName").value,
-state:document.getElementById("eventState").value,
-city:document.getElementById("eventCity").value,
-location:document.getElementById("eventLocation").value,
-date:document.getElementById("eventDate").value,
-link:document.getElementById("eventLink").value
-});
-
-alert("Event added");
-
-};
-
-/* delete event */
-
-window.deleteEvent=async function(id){
-await deleteDoc(doc(db,"events",id));
-};
-
-</script>
 </body>
 </html>
